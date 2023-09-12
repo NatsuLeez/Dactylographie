@@ -4,50 +4,71 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.datasource.LoremIpsum
-import com.example.dactylographie.ui.theme.DactylographieTheme
-import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import android.annotation.SuppressLint
-import android.text.Editable
+import android.content.Context
+import android.content.SharedPreferences
+import android.os.CountDownTimer
+import android.text.Html
+import android.text.SpannableString
+import org.w3c.dom.Text
+import android.text.Spannable
+import android.text.style.ForegroundColorSpan
+import androidx.constraintlayout.widget.ConstraintLayout
+import java.lang.StringBuilder
+import android.graphics.Color
+import android.graphics.Color.BLUE
 import android.widget.Button
-import android.widget.Toast
-import androidx.compose.ui.text.TextLayoutInput
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentActivity
-import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.FragmentTransaction
-import android.view.KeyEvent
-import android.widget.EditText
-import android.text.InputFilter
-import android.text.Spanned
-import android.text.TextWatcher
-import com.google.android.material.textfield.TextInputEditText
-
 
 class MainActivity : AppCompatActivity() {
 
-    public var words: String? = null
     private var list = mutableListOf<String>()
-    public var newList = mutableListOf<String>()
     private lateinit var myTextView: TextView
+    private lateinit var myTimer: TextView
     public var ind: Int = 0
+    private lateinit var fragmentScore: ScoreFrag
+    private lateinit var fragmentInput: InputFrag
+    lateinit var countDownTimer: CountDownTimer
+    var isTimerRunning = false
+    private lateinit var element: String
+    var secondesRestantes: Long = 0
 
 
     @SuppressLint("MissingInflatedId", "WrongViewCast")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.main_text)
+        val tempsTotalEnMillisecondes: Long = 120000 //
+        val intervalleEnMillisecondes: Long = 1000 // 1 seconde
 
         myTextView = findViewById(R.id.textView)
+        myTimer = findViewById(R.id.textView2)
+        val constraintLayout = findViewById<ConstraintLayout>(R.id.constraint_layout)
+        val buttonRe = findViewById<Button>(R.id.buttonre)
+        val buttonEnd = findViewById<Button>(R.id.buttonEnd)
+
+
+        constraintLayout.setBackgroundColor(android.graphics.Color.parseColor("#7e9cd6"))
+
+        buttonEnd.setOnClickListener{
+            fragmentInput.end()
+        }
+
+
+
+        countDownTimer = object : CountDownTimer(tempsTotalEnMillisecondes, intervalleEnMillisecondes) {
+            @SuppressLint("SetTextI18n")
+            override fun onTick(millisUntilFinished: Long) {
+                secondesRestantes = millisUntilFinished / 1000
+                isTimerRunning = true
+                myTimer.text = "Temps restant : $secondesRestantes secondes"
+            }
+            @SuppressLint("SetTextI18n")
+            override fun onFinish() {
+                myTimer.text = "Le minuteur est terminé."
+            }
+
+        }
 
 
         val test =  LoremIpsum(60)
@@ -58,33 +79,105 @@ class MainActivity : AppCompatActivity() {
         }
 
 
-
+        LocalStorageSingleton.init(this)
 
         myTextView.text = test.values.joinToString(separator = "")
 
-        val fragmentScore = ScoreFrag() // Create an instance of your fragment
+        fragmentScore = ScoreFrag()
         val fragmentManager = supportFragmentManager
         val fragmentTransaction = fragmentManager.beginTransaction()
         fragmentTransaction.replace(R.id.fragment_container, fragmentScore)
-        val fragmentInput = InputFrag()
+        fragmentInput = InputFrag()
         fragmentTransaction.replace(R.id.input_container, fragmentInput)
         fragmentTransaction.commit()
 
         val list1 = test.values
 
         for (i in list1) {
-            val words = i.split(" ")
+            val words = i.replace("\n", " ").replace(",", "").replace(".", "").split(" ")
             list.addAll(words)
         }
+
+
 }
-    fun tourDeList(): String? {
-        for ((index, element) in list.withIndex()) {
-            ind = index
-            newList.add(list[index])
-            return list[index]
-        }
-        return null
+
+    fun colorWord() {
+        val partiColor = "<font color='#4287f5'>${list.subList(0, ind).joinToString(" ")}</font> <font color='#ffffff'>${list.subList(ind, list.size).joinToString(" ")}</font>"
+        myTextView.text = Html.fromHtml(partiColor, Html.FROM_HTML_MODE_LEGACY)
     }
 
+    fun timeRecup(): String {
+        return "Temps restant : $secondesRestantes secondes"
+    }
+
+    fun stopTimer() {
+        countDownTimer.cancel()
+        temps = 0
+        isTimerRunning = false
+    }
+
+    open class LocalStorageHelper(private val context: Context) {
+        private val sharedPreferences: SharedPreferences =
+            context.getSharedPreferences("score", Context.MODE_PRIVATE)
+
+        fun sauvegarderDonnee(cle: String, valeur: Int) {
+            val editor = sharedPreferences.edit()
+            editor.putString(cle.toString(), valeur.toString())
+            editor.apply()
+        }
+
+        fun lireDonnee(cle: String, valeurParDefaut: Int): Comparable<*> {
+            return sharedPreferences.getString(cle.toString(), valeurParDefaut.toString()) ?: valeurParDefaut
+        }
+    }
+
+    object LocalStorageSingleton {
+        @SuppressLint("StaticFieldLeak")
+        private var localStorageHelper: LocalStorageHelper? = null
+
+        fun init(context: Context) {
+            if (localStorageHelper == null) {
+                localStorageHelper = object: LocalStorageHelper(context) {}
+            }
+        }
+
+        fun getLocalStorageHelper(requireContext: Context): LocalStorageHelper {
+            if (localStorageHelper == null) {
+                throw IllegalStateException("LocalStorageSingleton doit être initialisé avec le contexte.")
+            }
+            return localStorageHelper!!
+        }
+
+    }
+    var temps = 0
+
+    fun reinSco() = fragmentInput.reinScore()
+
+    fun editScore() = fragmentScore.scorChange()
+
+    fun timeStart() {
+        countDownTimer.start()
+        temps = 1
+    }
+
+    fun endFun() = fragmentInput.end()
+
+    fun editInd() {
+        ind ++
+    }
+    fun clearInd() {
+        ind = 0
+    }
+
+    fun parcourirEnBoucle(): String {
+
+        element = list[ind]
+        Log.d("chepa","gg $element")
+        return element
+
+    }
+    companion object {
+        const val scoreKey = "SCORE_KEY"
+    }
 }
 

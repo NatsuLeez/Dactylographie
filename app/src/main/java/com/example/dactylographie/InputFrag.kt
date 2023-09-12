@@ -16,50 +16,28 @@ import com.google.android.material.textfield.TextInputEditText
 class InputFrag : Fragment() {
 
     private lateinit var res: String
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-
-    }
+    private lateinit var act : MainActivity
+    private lateinit var editText: EditText
+    private lateinit var localStorage: MainActivity.LocalStorageHelper
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        val v = inflater.inflate(R.layout.input_frag, container, false)
+        editText = v.findViewById<TextInputEditText>(R.id.textInput)
+        localStorage = MainActivity.LocalStorageSingleton.getLocalStorageHelper(requireContext())
+        act = activity as MainActivity
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.input_frag, container, false)
+        return v
     }
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val editText = view.findViewById<TextInputEditText>(R.id.textInput)
 
-
-        val motActuel = (activity as MainActivity).tourDeList()
-
-        fun texteSaisi() {
-            res = editText?.text.toString()
-        }
-
-        fun verif(): Boolean? {
-            texteSaisi()
-            if (res == motActuel) {
-                return true
-            }
-            return null
-        }
-
-        fun handleSpacebarPress() {
-            texteSaisi()
-            verif()
-            // Handle the spacebar press event here
-            // Example: Show a toast message
-            //Log.d("verif","gg $res")
-            //Log.d("verif","gg $motActuel")
-        }
-
+        val context = this
 
         // Set an InputFilter to detect spacebar presses
         editText?.filters = arrayOf(object : InputFilter {
@@ -74,14 +52,63 @@ class InputFrag : Fragment() {
                 // Check if the space character is being entered
                 if (source?.contains(" ") == true) {
                     // Spacebar was pressed
-                    handleSpacebarPress()
+                    context.handleSpacebarPress()
                 }
                 return null // Allow the input
             }
         })
 
+
+    }
+    lateinit var motActuel: String
+
+    fun textActuel() {
+        motActuel = act.parcourirEnBoucle()
     }
 
+    fun texteSaisi() {
+        res = editText.text.toString()
+    }
+
+    var score = 0
+
+    data class Result(val value1: Int, val value2: String)
+
+    fun end(): Any {
+        val scoreFinal = score
+        val tempsFinal = act.timeRecup()
+        return Result(scoreFinal, tempsFinal)
+    }
+
+    fun verif(): Boolean? {
+        texteSaisi()
+        textActuel()
+        if (res == motActuel) {
+            score += 1
+            act.editInd()
+            localStorage.sauvegarderDonnee(MainActivity.scoreKey, score)
+            act.editScore()
+            editText.setText("")
+            act.colorWord()
+            return true
+        }  else {
+            println("wrong")
+        }
+
+        return null
+    }
+
+    fun reinScore() {
+        score = 0
+    }
+
+    fun handleSpacebarPress() {
+        if (act.temps != 1) {
+            act.timeStart()
+        }
+        texteSaisi()
+        verif()
+    }
 
 
 }

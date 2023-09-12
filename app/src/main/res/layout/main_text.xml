@@ -2,8 +2,11 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/constraint_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+
+
 
     <FrameLayout
         android:id="@+id/fragment_container"
@@ -12,8 +15,16 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-    </FrameLayout>
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="137dp"
+            android:layout_height="69dp"
+            android:layout_marginTop="60dp"
+            android:text="@string/textview2" />
 
+
+
+    </FrameLayout>
 
     <TextView
         android:id="@+id/textView"
@@ -26,15 +37,29 @@
         app:layout_constraintTop_toBottomOf="@id/fragment_container"
         app:layout_constraintVertical_bias="0.1" />
 
+
+
     <FrameLayout
         android:id="@+id/input_container"
-        android:layout_width="364dp"
-        android:layout_height="376dp"
-        android:layout_marginBottom="32dp"
+        android:layout_width="360dp"
+        android:layout_height="241dp"
+        android:layout_marginBottom="188dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.489"
+        app:layout_constraintHorizontal_bias="0.49"
         app:layout_constraintStart_toStartOf="parent"
+        android:inputType="textVisiblePassword"
         tools:ignore="MissingConstraints" />
+
+    <Button
+        android:id="@+id/buttonEnd"
+        style="@style/MonBoutonStyle"
+        android:layout_width="116dp"
+        android:layout_height="51dp"
+        android:text="@string/buttonEnd"
+        app:layout_constraintBottom_toTopOf="@+id/textView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/fragment_container"
+        app:layout_constraintVertical_bias="1.0" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
