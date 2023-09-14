@@ -10,17 +10,22 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import java.util.*
-
+import kotlin.properties.Delegates
 
 
 class ScoreFrag : Fragment() {
 
+    //var endButtonPressed = true
     private lateinit var editTextNumber3: TextView
     private lateinit var retryButton: Button
-    private lateinit var endButton: Button
+    lateinit var endButton: Button
     private lateinit var localStorage :LocalStorageSingleton.LocalStorageHelper
     public lateinit var fragmentMain: MainFrag
     private lateinit var fragmentInput: InputFrag
+    private lateinit var fragmentMem: MemoryFrag
+    private lateinit var fragmentScore: ScoreFrag
+
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -31,6 +36,7 @@ class ScoreFrag : Fragment() {
         retryButton = v.findViewById(R.id.buttonre)
         endButton = v.findViewById(R.id.buttonEnd)
         fragmentInput = InputFrag()
+
         // Inflate the layout for this fragment
         localStorage = LocalStorageSingleton.getLocalStorageHelper(requireContext())
         return v
@@ -39,22 +45,31 @@ class ScoreFrag : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+
         fragmentMain = parentFragment as MainFrag
+        fragmentMem = MemoryFrag()
+        fragmentScore = ScoreFrag()
 
         retryButton.setOnClickListener{
             retry()
         }
 
         endButton.setOnClickListener{
-            sendScor()
-            ScreenSlidePagerActivity()
+            end()
         }
     }
 
-    fun sendScor() {
-        LocalStorageSingleton.localStorageHelper?.sauvegarderDonnee(MainActivity.scoreKey, fragmentInput.score)
-        var tempsFinal = fragmentMain.timeRecup()
+
+
+
+    fun end() {
+        if (fragmentMain.isTimerRunning) {
+            fragmentMain.stopTimer()
+        }
+        fragmentMain.clearInd()
     }
+
+
     fun retry() {
         if (fragmentMain.isTimerRunning) {
             fragmentMain.stopTimer()

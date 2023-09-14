@@ -9,7 +9,7 @@
     <string name="hint">hint</string>
     <string name="textview2">TextView</string>
     <string name="buttonretry">Retry</string>
-    <string name="buttonEnd">Send Score</string>
+    <string name="buttonEnd">End</string>
     <string name="textviewMemo">TextView</string>
     <string name="title_activity_main2">MainActivity2</string>
     <!-- Strings used for fragments for navigation -->

@@ -13,6 +13,7 @@ import android.widget.TextView
 import androidx.compose.ui.tooling.preview.datasource.LoremIpsum
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
+import kotlin.properties.Delegates
 
 
 class MainFrag : Fragment() {
@@ -23,10 +24,12 @@ class MainFrag : Fragment() {
     public var ind: Int = 0
     private lateinit var fragmentScore: ScoreFrag
     private lateinit var fragmentInput: InputFrag
+    private lateinit var localStorage :LocalStorageSingleton.LocalStorageHelper
     lateinit var countDownTimer: CountDownTimer
     var isTimerRunning = false
     private lateinit var element: String
     var secondesRestantes: Long = 0
+    public var tempsFinal = 0
 
     @SuppressLint("MissingInflatedId")
     override fun onCreateView(
@@ -36,7 +39,7 @@ class MainFrag : Fragment() {
 
         val v = inflater.inflate(R.layout.fragment_main, container, false)
 
-
+        localStorage = LocalStorageSingleton.getLocalStorageHelper(requireContext())
 
         myTextView = v.findViewById(R.id.textView)
         myTimer = v.findViewById(R.id.textView2)
@@ -51,12 +54,11 @@ class MainFrag : Fragment() {
 
         val constraintLayout = v.findViewById<ConstraintLayout>(R.id.constraint_layout)
         val buttonRe = v.findViewById<Button>(R.id.buttonre)
-        //val buttonEnd = v.findViewById<Button>(R.id.buttonEnd)
 
         constraintLayout.setBackgroundColor(android.graphics.Color.parseColor("#7e9cd6"))
 
 
-        val tempsTotalEnMillisecondes: Long = 120000 //
+        val tempsTotalEnMillisecondes: Long = 160000 //
         val intervalleEnMillisecondes: Long = 1000 // 1 seconde
 
         countDownTimer = object : CountDownTimer(tempsTotalEnMillisecondes, intervalleEnMillisecondes) {
@@ -65,10 +67,12 @@ class MainFrag : Fragment() {
                 secondesRestantes = millisUntilFinished / 1000
                 isTimerRunning = true
                 myTimer?.text = "Temps restant : $secondesRestantes secondes"
+                localStorage.sauvegarderDonnee(MainActivity.timeKey, secondesRestantes.toInt())
             }
             @SuppressLint("SetTextI18n")
             override fun onFinish() {
                 myTimer?.text = "Le minuteur est terminé."
+                tempsFinal = secondesRestantes.toInt()
             }
 
         }

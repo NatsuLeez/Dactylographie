@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import com.google.android.material.textfield.TextInputEditText
+import kotlin.properties.Delegates
 
 
 class InputFrag : Fragment() {
@@ -18,6 +19,8 @@ class InputFrag : Fragment() {
     private lateinit var editText: EditText
     private lateinit var localStorage: LocalStorageSingleton.LocalStorageHelper
     public lateinit var fragmentMain: MainFrag
+    private lateinit var fragmentMemoryFrag: MemoryFrag
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -36,6 +39,7 @@ class InputFrag : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         fragmentMain = parentFragment as MainFrag
+        fragmentMemoryFrag = MemoryFrag()
 
         val context = this
 
@@ -73,8 +77,6 @@ class InputFrag : Fragment() {
 
     var score = 0
 
-    data class Result(val value1: String, val value2: String)
-
 
 
     fun verif(): Boolean? {
@@ -83,7 +85,8 @@ class InputFrag : Fragment() {
         if (res == motActuel) {
             score += 1
             fragmentMain.editInd()
-            localStorage.sauvegarderDonnee(MainActivity.scoreKey, score)
+            localStorage.sauvegarderDonnee(MainActivity.scoreKey, score.toInt())
+            //localStorage.sauvegarderDonnee(MainActivity.timeKey, MainFrag().secondesRestantes.toInt())
             fragmentMain.editScore()
             editText.setText("")
             fragmentMain.colorWord()
